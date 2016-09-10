@@ -5,8 +5,9 @@ function CreateGalaxy(numStars, xcentre, ycentre, radius, seed)
   galaxy.ycentre = ycentre or 0.0
   galaxy.radius = radius or 1.0
   galaxy.seed = seed or 1
-  galaxy.etaGrav = 10.0
+  galaxy.etaGrav = 50.0
   galaxy.Gconst = 20000.0
+  galaxy.timeMult = 0.1
   galaxy.stars={}
 
   galaxy.ship={}
@@ -40,11 +41,19 @@ function CreateGalaxy(numStars, xcentre, ycentre, radius, seed)
 
   galaxy.CreateShip = function(m,x,y,vx,vy)
     local ship = galaxy.ship
-    ship.m = m
-    ship.x = x
-    ship.y = y
-    ship.vx = vx or 0.0
-    ship.vy = vy or 0.0
+    ship.m   = m
+    ship.x   = x
+    ship.y   = y
+    ship.x0  = x
+    ship.y0  = y
+    ship.vx  = vx or 0.0
+    ship.vy  = vy or 0.0
+    ship.vx0 = 0.0
+    ship.vy0 = 0.0
+    ship.ax  = 0.0
+    ship.ay  = 0.0
+    ship.ax0 = 0.0
+    ship.ay0 = 0.0
   end
 
   galaxy.CalculateAcceleration = function(xship, yship)
@@ -52,11 +61,12 @@ function CreateGalaxy(numStars, xcentre, ycentre, radius, seed)
     local ay = 0.0
     for e=1,#galaxy.stars do
       local m = galaxy.stars[e].m
+      local rsmooth = m*galaxy.etaGrav
       local x = galaxy.stars[e].x
       local y = galaxy.stars[e].y
       local dx = x - xship
       local dy = y - yship
-      local distsqd = dx*dx + dy*dy + galaxy.etaGrav*galaxy.etaGrav
+      local distsqd = dx*dx + dy*dy + rsmooth*rsmooth--galaxy.etaGrav*galaxy.etaGrav
       local dist = math.sqrt(distsqd)
       local invdist = 1.0/dist
       local invdist3 = math.pow(invdist, 3.0)
@@ -71,48 +81,80 @@ function CreateGalaxy(numStars, xcentre, ycentre, radius, seed)
     return ax,ay
   end
 
-  galaxy.CalculateShipPath = function(rangePath)
+  galaxy.CalculateShipPath = function(rangePath, ax_thrust, ay_thrust)
     local ship = galaxy.ship
-    local ax,ay,rsqd
+    local ax,ay,ax0,ay0,vx0,vy0,x0,y0
     local x = galaxy.ship.x
     local y = galaxy.ship.y
     local vx = galaxy.ship.vx
     local vy = galaxy.ship.vy
 
+    local pathTot = 0.0
+
     galaxy.shippath = {}
     table.insert(galaxy.shippath, x)
     table.insert(galaxy.shippath, y)
 
+    ax, ay = galaxy.CalculateAcceleration(x, y)
+    ax = ax + ax_thrust
+    ay = ay + ay_thrust
+
     repeat
-      ax,ay = galaxy.CalculateAcceleration(x, y)
+      x0 = x
+      y0 = y
+      vx0 = vx
+      vy0 = vy
+      ax0 = ax
+      ay0 = ay
+
       local asqd = ax*ax + ay*ay
-      local dt = 1.0*math.sqrt(galaxy.etaGrav / math.sqrt(asqd))
-      x = x + vx*dt
-      y = y + vy*dt
-      vx = vx + ax*dt
-      vy = vy + ay*dt
-      rsqd = (x - ship.x)*(x - ship.x) + (y - ship.y)*(y - ship.y)
+      local dtLocal = galaxy.timeMult*math.sqrt(galaxy.etaGrav / math.sqrt(asqd))
+
+      x = x0 + vx0*dtLocal + 0.5*ax0*dtLocal*dtLocal
+      y = y0 + vy0*dtLocal + 0.5*ay0*dtLocal*dtLocal
+
+      ax, ay = galaxy.CalculateAcceleration(x, y)
+      ax = ax + ax_thrust
+      ay = ay + ay_thrust
+      vx = vx0 + 0.5*(ax0 + ax)*dtLocal
+      vy = vy0 + 0.5*(ay0 + ay)*dtLocal
+
+      pathTot = pathTot + math.sqrt((x - x0)*(x - x0) + (y - y0)*(y - y0))
       table.insert(galaxy.shippath, x)
       table.insert(galaxy.shippath, y)
-    until rsqd > rangePath*rangePath
+    until pathTot > rangePath
 
   end
 
   galaxy.AdvanceShip = function(dt_full, ax_thrust, ay_thrust)
     local dt_sum = 0.0
     local ship = galaxy.ship
+    ship.ax, ship.ay = galaxy.CalculateAcceleration(ship.x, ship.y)
+    ship.ax = ship.ax + ax_thrust
+    ship.ay = ship.ay + ay_thrust
+
     repeat
-      local ax,ay = galaxy.CalculateAcceleration(ship.x, ship.y)
-      ax = ax + ax_thrust
-      ay = ay + ay_thrust
-      local asqd = ax*ax + ay*ay
-      local dt = math.sqrt(galaxy.etaGrav / math.sqrt(asqd))
-      dt = math.min(dt, 1.0000001*(dt_full - dt_sum))
-      ship.x = ship.x + ship.vx*dt
-      ship.y = ship.y + ship.vy*dt
-      ship.vx = ship.vx + ax*dt
-      ship.vy = ship.vy + ay*dt
-      dt_sum = dt_sum + dt
+      ship.x0  = ship.x
+      ship.y0  = ship.y
+      ship.vx0 = ship.vx
+      ship.vy0 = ship.vy
+      ship.ax0 = ship.ax
+      ship.ay0 = ship.ay
+
+      local asqd = ship.ax*ship.ax + ship.ay*ship.ay
+      local dtLocal = galaxy.timeMult*math.sqrt(galaxy.etaGrav / math.sqrt(asqd))
+      dtLocal = math.min(dtLocal, 1.0000001*(dt_full - dt_sum))
+
+      ship.x = ship.x0 + ship.vx0*dtLocal + 0.5*ship.ax0*dtLocal*dtLocal
+      ship.y = ship.y0 + ship.vy0*dtLocal + 0.5*ship.ay0*dtLocal*dtLocal
+
+      ship.ax, ship.ay = galaxy.CalculateAcceleration(ship.x, ship.y)
+      ship.ax = ship.ax + ax_thrust
+      ship.ay = ship.ay + ay_thrust
+      ship.vx = ship.vx0 + 0.5*(ship.ax0 + ship.ax)*dtLocal
+      ship.vy = ship.vy0 + 0.5*(ship.ay0 + ship.ay)*dtLocal
+
+      dt_sum = dt_sum + dtLocal
     until dt_sum >= dt_full
   end
 
