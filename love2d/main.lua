@@ -1,4 +1,5 @@
 require("lib/postshader")
+require("lib/galaxy")
 
 function love.load()
 	love.physics.setMeter(64) --the height of a meter our worlds will be 64px
@@ -12,13 +13,17 @@ function love.load()
 	objects.ball.shape = love.physics.newCircleShape(8) --the ball's shape has a radius of 20
 	objects.ball.fixture = love.physics.newFixture(objects.ball.body, objects.ball.shape, 1) -- Attach fixture to body and give it a density of 1.
 	objects.ball.fixture:setRestitution(0.9) --let the ball bounce
-	
+
 	--let's create a ball 2
 	objects.ball2 = {}
 	objects.ball2.body = love.physics.newBody(world, 650/2 + 200, 650/2, "dynamic") --place the body in the center of the world and make it dynamic, so it can move around
 	objects.ball2.shape = love.physics.newCircleShape(32) --the ball's shape has a radius of 20
 	objects.ball2.fixture = love.physics.newFixture(objects.ball2.body, objects.ball2.shape, 1) -- Attach fixture to body and give it a density of 1.
 	objects.ball2.fixture:setRestitution(0.9) --let the ball bounce
+
+	milkyWay = CreateGalaxy(100, 300.0, 2)
+	milkyWay:Init()
+
 end
 
 function love.update(dt)
@@ -35,13 +40,13 @@ function love.update(dt)
 
 		forceX = math.min(50.0, 50.0 / (objects.ball2.body:getX() - objects.ball.body:getX())) * dx2
 	end
-	
+
 	if math.abs(dy) > 10 then
 		local dy2 = dy / (dx + dy)
 
 		forceY = math.min(50.0, 50.0 / (objects.ball2.body:getY() - objects.ball.body:getY())) * dy2
 	end
-	
+
 	objects.ball.body:applyForce(forceX, forceY)
 
 	--here we are going to create some keyboard events
@@ -59,9 +64,11 @@ end
 function love.draw()
 	love.graphics.setColor(193, 47, 14) --set the drawing color to red for the ball
 	love.graphics.circle("fill", objects.ball.body:getX(), objects.ball.body:getY(), objects.ball.shape:getRadius())
-	
+
 	love.graphics.setColor(14, 47, 193) --set the drawing color to red for the ball
 	love.graphics.circle("fill", objects.ball2.body:getX(), objects.ball2.body:getY(), objects.ball2.shape:getRadius())
+
+  milkyWay.draw()
 end
 
 function love.keypressed(key, scancode, isrepeat)
