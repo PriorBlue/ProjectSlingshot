@@ -8,7 +8,7 @@ function love.load()
 
 	--let's create a ball
 	objects.ball = {}
-	objects.ball.body = love.physics.newBody(world, 650/2, 650/2, "dynamic") --place the body in the center of the world and make it dynamic, so it can move around
+	objects.ball.body = love.physics.newBody(world, 650/2 - 100, 650/2, "dynamic") --place the body in the center of the world and make it dynamic, so it can move around
 	objects.ball.shape = love.physics.newCircleShape(8) --the ball's shape has a radius of 20
 	objects.ball.fixture = love.physics.newFixture(objects.ball.body, objects.ball.shape, 1) -- Attach fixture to body and give it a density of 1.
 	objects.ball.fixture:setRestitution(0.9) --let the ball bounce
@@ -16,7 +16,7 @@ function love.load()
 	--let's create a ball 2
 	objects.ball2 = {}
 	objects.ball2.body = love.physics.newBody(world, 650/2 + 200, 650/2, "dynamic") --place the body in the center of the world and make it dynamic, so it can move around
-	objects.ball2.shape = love.physics.newCircleShape(32) --the ball's shape has a radius of 20
+	objects.ball2.shape = love.physics.newCircleShape(128) --the ball's shape has a radius of 20
 	objects.ball2.fixture = love.physics.newFixture(objects.ball2.body, objects.ball2.shape, 1) -- Attach fixture to body and give it a density of 1.
 	objects.ball2.fixture:setRestitution(0.9) --let the ball bounce
 end
@@ -57,6 +57,8 @@ function love.update(dt)
 end
 
 function love.draw()
+	love.graphics.translate(-objects.ball.body:getX() + love.graphics.getWidth() * 0.5, -objects.ball.body:getY() + love.graphics.getHeight() * 0.5)
+	
 	love.graphics.setColor(193, 47, 14) --set the drawing color to red for the ball
 	love.graphics.circle("fill", objects.ball.body:getX(), objects.ball.body:getY(), objects.ball.shape:getRadius())
 	
