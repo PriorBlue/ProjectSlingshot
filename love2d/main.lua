@@ -20,6 +20,10 @@ function love.load()
 
 	ZOOM = 1
 	background = love.graphics.newImage("gfx/starfield_4K.png")
+
+  gameTime = 0.0
+	shipPathRange = 500.0
+
 end
 
 function love.update(dt)
@@ -46,13 +50,15 @@ function love.update(dt)
 		ay = ay + 10.0
 	end
 
-	milkyWay.AdvanceShip(dt, ax, ay)
-	milkyWay.CalculateShipPath(500.0, 0.0, 0.0)
+	milkyWay.AdvanceShip(dt, gameTime, ax, ay)
+	milkyWay.CalculateShipPath(shipPathRange)
+
+	gameTime = gameTime + dt
 end
 
 function love.draw()
 	love.graphics.draw(background)
-	
+
 
 	love.graphics.translate(-milkyWay.ship.x * ZOOM + love.graphics.getWidth() * 0.5, -milkyWay.ship.y * ZOOM + love.graphics.getHeight() * 0.5)
 	love.graphics.scale(ZOOM, ZOOM)
