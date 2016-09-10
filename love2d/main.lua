@@ -18,6 +18,7 @@ function love.load()
 
 	milkyWay.CreateShip(1.0, 0.0, 0.0, 0.5, 0.0)
 
+	ZOOM = 1
 end
 
 function love.update(dt)
@@ -49,6 +50,7 @@ end
 
 function love.draw()
 	love.graphics.translate(-milkyWay.ship.x + love.graphics.getWidth() * 0.5, -milkyWay.ship.y + love.graphics.getHeight() * 0.5)
+	love.graphics.scale(ZOOM, ZOOM)
 
 	love.graphics.setColor(193, 47, 14) --set the drawing color to red for the ball
 	love.graphics.circle("fill", milkyWay.ship.x, milkyWay.ship.y, 8) --ship.body:getX(), ship.body:getY(), ship.shape:getRadius())
@@ -90,5 +92,9 @@ function love.mousemoved(x, y, dx, dy)
 end
 
 function love.wheelmoved(x, y)
-
+	if y < 1 then
+		ZOOM = ZOOM * 0.5
+	else
+		ZOOM = ZOOM * 2
+	end
 end

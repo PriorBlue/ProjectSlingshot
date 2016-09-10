@@ -11,7 +11,7 @@ function CreateGalaxy(numStars, xcentre, ycentre, radius, seed)
 
   galaxy.ship={}
   galaxy.shippath = nil
-
+  galaxy.img = love.graphics.newImage("gfx/planet_256.png")
 
   galaxy.Init = function(self)
     love.math.setRandomSeed(self.seed)
@@ -118,7 +118,8 @@ function CreateGalaxy(numStars, xcentre, ycentre, radius, seed)
     for e=1,#galaxy.stars do
       local x = galaxy.stars[e].x
       local y = galaxy.stars[e].y
-      love.graphics.circle("fill", x, y, 10.0*math.sqrt(galaxy.stars[e].m))
+	  love.graphics.draw(galaxy.img, x, y, 0, 0.1*math.sqrt(galaxy.stars[e].m), 0.1*math.sqrt(galaxy.stars[e].m), galaxy.img:getWidth() * 0.5, galaxy.img:getHeight() * 0.5)
+      --love.graphics.circle("fill", x, y, 10.0*math.sqrt(galaxy.stars[e].m))
     end
     if galaxy.shippath then
       DEBUG.path = #galaxy.shippath
