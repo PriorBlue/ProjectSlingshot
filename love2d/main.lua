@@ -19,9 +19,11 @@ function love.load()
 	milkyWay.CreateShip(1.0, 0.0, 0.0, 0.5, 0.0)
 
 	ZOOM = 1
+	background = love.graphics.newImage("gfx/starfield_4K.png")
 end
 
 function love.update(dt)
+	love.window.setTitle(love.timer.getFPS())
 	--world:update(dt) --this puts the world into motion
 
   --ax,ay = milkyWay.CalculateAcceleration(ship.body:getX(), ship.body:getY())
@@ -49,11 +51,10 @@ function love.update(dt)
 end
 
 function love.draw()
+	love.graphics.draw(background)
+	
 	love.graphics.translate(-milkyWay.ship.x + love.graphics.getWidth() * 0.5, -milkyWay.ship.y + love.graphics.getHeight() * 0.5)
 	love.graphics.scale(ZOOM, ZOOM)
-
-	love.graphics.setColor(193, 47, 14) --set the drawing color to red for the ball
-	love.graphics.circle("fill", milkyWay.ship.x, milkyWay.ship.y, 8) --ship.body:getX(), ship.body:getY(), ship.shape:getRadius())
 
   milkyWay.draw()
 
