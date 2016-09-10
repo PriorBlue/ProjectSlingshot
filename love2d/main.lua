@@ -1,67 +1,68 @@
 require("lib/postshader")
+require("lib/galaxy")
 
 function love.load()
-	love.physics.setMeter(64) --the height of a meter our worlds will be 64px
-	world = love.physics.newWorld(0, 0, true) --create a world for the bodies to exist in with horizontal gravity of 0 and vertical gravity of 9.81
-
-	objects = {} -- table to hold all our physical objects
+	--love.physics.setMeter(64) --the height of a meter our worlds will be 64px
+	--world = love.physics.newWorld(0, 0, true) --create a world for the bodies to exist in with horizontal gravity of 0 and vertical gravity of 9.81
 
 	--let's create a ball
-	objects.ball = {}
-	objects.ball.body = love.physics.newBody(world, 650/2, 650/2, "dynamic") --place the body in the center of the world and make it dynamic, so it can move around
-	objects.ball.shape = love.physics.newCircleShape(8) --the ball's shape has a radius of 20
-	objects.ball.fixture = love.physics.newFixture(objects.ball.body, objects.ball.shape, 1) -- Attach fixture to body and give it a density of 1.
-	objects.ball.fixture:setRestitution(0.9) --let the ball bounce
-	
-	--let's create a ball 2
-	objects.ball2 = {}
-	objects.ball2.body = love.physics.newBody(world, 650/2 + 200, 650/2, "dynamic") --place the body in the center of the world and make it dynamic, so it can move around
-	objects.ball2.shape = love.physics.newCircleShape(32) --the ball's shape has a radius of 20
-	objects.ball2.fixture = love.physics.newFixture(objects.ball2.body, objects.ball2.shape, 1) -- Attach fixture to body and give it a density of 1.
-	objects.ball2.fixture:setRestitution(0.9) --let the ball bounce
+	--ship = {}
+	--ship.body = love.physics.newBody(world, 0.0, 0.0, "dynamic") --place the body in the center of the world and make it dynamic, so it can move around
+	--ship.shape = love.physics.newCircleShape(8) --the ball's shape has a radius of 20
+	--ship.fixture = love.physics.newFixture(ship.body, ship.shape, 1) -- Attach fixture to body and give it a density of 1.
+	--ship.fixture:setRestitution(0.9) --let the ball bounce
+
+	milkyWay = CreateGalaxy(400, 0.0, 0.0, 3000.0, 2)
+	milkyWay:Init()
+	DEBUG = {}
+
+	milkyWay.CreateShip(1.0, 0.0, 0.0, 0.5, 0.0)
+
 end
 
 function love.update(dt)
-	world:update(dt) --this puts the world into motion
+	--world:update(dt) --this puts the world into motion
 
-	local dx = objects.ball2.body:getX() - objects.ball.body:getX()
-	local dy = objects.ball2.body:getY() - objects.ball.body:getY()
+  --ax,ay = milkyWay.CalculateAcceleration(ship.body:getX(), ship.body:getY())
 
-	local forceX = 0
-	local forceY = 0
+  local ax = 0.0
+	local ay = 0.0
 
-	if math.abs(dx) > 10 then
-		local dx2 = dx / (dx + dy)
 
-		forceX = math.min(50.0, 50.0 / (objects.ball2.body:getX() - objects.ball.body:getX())) * dx2
-	end
-	
-	if math.abs(dy) > 10 then
-		local dy2 = dy / (dx + dy)
-
-		forceY = math.min(50.0, 50.0 / (objects.ball2.body:getY() - objects.ball.body:getY())) * dy2
-	end
-	
-	objects.ball.body:applyForce(forceX, forceY)
+	--ship.body:applyForce(ax, ay)
+	--print(ax,ay)
 
 	--here we are going to create some keyboard events
 	if love.keyboard.isDown("right") then --press the right arrow key to push the ball to the right
-		objects.ball.body:applyForce(10, 0)
+		ax = ax + 10.0
 	elseif love.keyboard.isDown("left") then --press the left arrow key to push the ball to the left
-		objects.ball.body:applyForce(-10, 0)
+		ax = ax - 10.0
 	elseif love.keyboard.isDown("up") then --press the up arrow key to set the ball in the air
-		objects.ball.body:applyForce(0, -10)
+		ay = ay - 10
 	elseif love.keyboard.isDown("down") then --press the up arrow key to set the ball in the air
-		objects.ball.body:applyForce(0, 10)
+		ay = ay + 10
 	end
+
+	milkyWay.AdvanceShip(dt, ax, ay)
+	milkyWay.CalculateShipPath(500.0)
 end
 
 function love.draw()
+	love.graphics.translate(-milkyWay.ship.x + love.graphics.getWidth() * 0.5, -milkyWay.ship.y + love.graphics.getHeight() * 0.5)
+
 	love.graphics.setColor(193, 47, 14) --set the drawing color to red for the ball
-	love.graphics.circle("fill", objects.ball.body:getX(), objects.ball.body:getY(), objects.ball.shape:getRadius())
-	
-	love.graphics.setColor(14, 47, 193) --set the drawing color to red for the ball
-	love.graphics.circle("fill", objects.ball2.body:getX(), objects.ball2.body:getY(), objects.ball2.shape:getRadius())
+	love.graphics.circle("fill", milkyWay.ship.x, milkyWay.ship.y, 8) --ship.body:getX(), ship.body:getY(), ship.shape:getRadius())
+
+  milkyWay.draw()
+
+	love.graphics.origin()
+	local ax,ay = milkyWay.CalculateAcceleration(milkyWay.ship.x, milkyWay.ship.y)
+	local count = 0
+	for k,v in pairs(DEBUG) do
+		count = count + 1
+    love.graphics.print(k .. "   " .. v, 16, count*16)
+	end
+	--love.graphics.print(math.floor(ax) .. "                        " .. math.floor(ay), 16, 16)
 end
 
 function love.keypressed(key, scancode, isrepeat)
