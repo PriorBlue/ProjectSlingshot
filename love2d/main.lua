@@ -24,8 +24,23 @@ end
 function love.update(dt)
 	world:update(dt) --this puts the world into motion
 
-	local forceX = math.min(50.0, 50.0 / (objects.ball2.body:getX() - objects.ball.body:getX()))
-	local forceY = math.min(50.0, 50.0 / (objects.ball2.body:getY() - objects.ball.body:getY()))
+	local dx = objects.ball2.body:getX() - objects.ball.body:getX()
+	local dy = objects.ball2.body:getY() - objects.ball.body:getY()
+
+	local forceX = 0
+	local forceY = 0
+
+	if math.abs(dx) > 10 then
+		local dx2 = dx / (dx + dy)
+
+		forceX = math.min(50.0, 50.0 / (objects.ball2.body:getX() - objects.ball.body:getX())) * dx2
+	end
+	
+	if math.abs(dy) > 10 then
+		local dy2 = dy / (dx + dy)
+
+		forceY = math.min(50.0, 50.0 / (objects.ball2.body:getY() - objects.ball.body:getY())) * dy2
+	end
 	
 	objects.ball.body:applyForce(forceX, forceY)
 
