@@ -12,7 +12,10 @@ function CreateGalaxy(numStars, xcentre, ycentre, radius, seed)
 
   galaxy.ship={}
   galaxy.shippath = nil
-  galaxy.img = love.graphics.newImage("gfx/planet_256.png")
+  galaxy.asteroidImg = love.graphics.newImage("gfx/asteroid_color.png")
+  galaxy.planetImg = love.graphics.newImage("gfx/planet_256.png")
+  galaxy.sunImg = love.graphics.newImage("gfx/planet_256.png")
+  galaxy.shipImg = love.graphics.newImage("gfx/mothership_body_color.png")
 
   galaxy.Init = function(self)
     love.math.setRandomSeed(self.seed)
@@ -160,14 +163,21 @@ function CreateGalaxy(numStars, xcentre, ycentre, radius, seed)
     for e=1,#galaxy.stars do
       local x = galaxy.stars[e].x
       local y = galaxy.stars[e].y
-	  love.graphics.draw(galaxy.img, x, y, 0, 0.1*math.sqrt(galaxy.stars[e].m), 0.1*math.sqrt(galaxy.stars[e].m), galaxy.img:getWidth() * 0.5, galaxy.img:getHeight() * 0.5)
-      --love.graphics.circle("fill", x, y, 10.0*math.sqrt(galaxy.stars[e].m))
+		if galaxy.stars[e].m < 0.5 then  
+			love.graphics.draw(galaxy.asteroidImg, x, y, 0, 0.1*math.sqrt(galaxy.stars[e].m), 0.1*math.sqrt(galaxy.stars[e].m), galaxy.asteroidImg:getWidth() * 0.5, galaxy.asteroidImg:getHeight() * 0.5)
+		else
+			love.graphics.draw(galaxy.planetImg, x, y, 0, 0.2*math.sqrt(galaxy.stars[e].m), 0.2*math.sqrt(galaxy.stars[e].m), galaxy.planetImg:getWidth() * 0.5, galaxy.planetImg:getHeight() * 0.5)
+		end
+	  --love.graphics.circle("fill", x, y, 10.0*math.sqrt(galaxy.stars[e].m))
     end
     if galaxy.shippath then
       DEBUG.path = #galaxy.shippath
       love.graphics.setColor(0, 255, 0)
       love.graphics.line(galaxy.shippath)
     end
+	
+	love.graphics.setColor(255, 255, 255) --set the drawing color to red for the ball
+	love.graphics.draw(galaxy.shipImg, milkyWay.ship.x, milkyWay.ship.y, -math.atan2(milkyWay.ship.vx, milkyWay.ship.vy), -0.01, -0.01, galaxy.shipImg:getWidth() * 0.5, galaxy.shipImg:getHeight() * 0.5) --ship.body:getX(), ship.body:getY(), ship.shape:getRadius())
   end
 
   return galaxy
