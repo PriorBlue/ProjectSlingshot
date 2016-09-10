@@ -38,13 +38,13 @@ function love.update(dt)
 	elseif love.keyboard.isDown("left") then --press the left arrow key to push the ball to the left
 		ax = ax - 10.0
 	elseif love.keyboard.isDown("up") then --press the up arrow key to set the ball in the air
-		ay = ay - 10
+		ay = ay - 10.0
 	elseif love.keyboard.isDown("down") then --press the up arrow key to set the ball in the air
-		ay = ay + 10
+		ay = ay + 10.0
 	end
 
 	milkyWay.AdvanceShip(dt, ax, ay)
-	milkyWay.CalculateShipPath(500.0)
+	milkyWay.CalculateShipPath(500.0, 0.0, 0.0)
 end
 
 function love.draw()
