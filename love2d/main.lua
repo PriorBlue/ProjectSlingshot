@@ -36,13 +36,13 @@ function love.update(dt)
 	--print(ax,ay)
 
 	--here we are going to create some keyboard events
-	if love.keyboard.isDown("right") then --press the right arrow key to push the ball to the right
+	if love.keyboard.isDown("right") or love.keyboard.isDown("d") then --press the right arrow key to push the ball to the right
 		ax = ax + 10.0
-	elseif love.keyboard.isDown("left") then --press the left arrow key to push the ball to the left
+	elseif love.keyboard.isDown("left") or love.keyboard.isDown("a") then --press the left arrow key to push the ball to the left
 		ax = ax - 10.0
-	elseif love.keyboard.isDown("up") then --press the up arrow key to set the ball in the air
+	elseif love.keyboard.isDown("up") or love.keyboard.isDown("w") then --press the up arrow key to set the ball in the air
 		ay = ay - 10.0
-	elseif love.keyboard.isDown("down") then --press the up arrow key to set the ball in the air
+	elseif love.keyboard.isDown("down") or love.keyboard.isDown("s") then --press the up arrow key to set the ball in the air
 		ay = ay + 10.0
 	end
 
@@ -53,9 +53,9 @@ end
 function love.draw()
 	love.graphics.draw(background)
 	
-	love.graphics.translate(-milkyWay.ship.x + love.graphics.getWidth() * 0.5, -milkyWay.ship.y + love.graphics.getHeight() * 0.5)
-	love.graphics.scale(ZOOM, ZOOM)
 
+	love.graphics.translate(-milkyWay.ship.x * ZOOM + love.graphics.getWidth() * 0.5, -milkyWay.ship.y * ZOOM + love.graphics.getHeight() * 0.5)
+	love.graphics.scale(ZOOM, ZOOM)
   milkyWay.draw()
 
 	love.graphics.origin()
